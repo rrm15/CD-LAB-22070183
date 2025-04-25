@@ -1,23 +1,20 @@
 %{
 #include <stdio.h>
-#include <stdlib.h>
+void yyerror(const char *msg);
+int yylex();
+extern char *yytext;
 %}
-
-%token IDENTIFIER INVALID
-
+%token IDENTIFIER
 %%
-input: IDENTIFIER { printf("Valid variable name.\n"); exit(0); }
-     | INVALID    { printf("Invalid variable name.\n"); exit(1); }
-     ;
+stmt: IDENTIFIER {printf("Valid variable: %s\n",yytext);return 0; }
+  ;
 %%
-
-int main() {
-    printf("Enter a variable name: ");
-    yyparse();
-    return 0;
+void  yyerror(const char *msg){
+  printf("Invalid Variable\n");
 }
 
-int yyerror(const char *s) {
-    printf("Error: %s\n", s);
-    return 0;
+int main(){
+  printf("Enter a variable name: ");
+  yyparse();
+  return 0;
 }
