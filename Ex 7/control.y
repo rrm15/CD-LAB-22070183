@@ -1,83 +1,61 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
+#include<stdio.h>
+void yyerror(const char *msg);
+int yylex();
 %}
 
-%token IF ELSE WHILE FOR SWITCH CASE DEFAULT ID NUMBER RELOP
-%token LPAREN RPAREN LBRACE RBRACE SEMICOLON COLON
+%token IF ELSE FOR WHILE DEFAULT SWITCH CASE
+%token ID NUMBER
+%token LPAREN RPAREN LBRACE RBRACE SEMICOLON COLON COMMA RELOP ASSIGN
 
 %%
 program:
-    stmt_list
-    ;
-
-stmt_list:
-    stmt_list stmt
-    | stmt
-    ;
-
+        program stmt
+        |
+        ;
 stmt:
-    if_stmt
-    | if_else_stmt
-    | if_else_if_stmt
-    | while_stmt
-    | for_stmt
-    | switch_stmt
-    ;
+        if_stmt
+        | for_stmt
+        | while_stmt
+        | switch_stmt
+        ;
 
 if_stmt:
-    IF LPAREN cond RPAREN block { printf("Valid IF statement\n"); }
-    ;
-
-if_else_stmt:
-    IF LPAREN cond RPAREN block ELSE block { printf("Valid IF-ELSE statement\n"); }
-    ;
-
-if_else_if_stmt:
-    IF LPAREN cond RPAREN block elseif_blocks ELSE block { printf("Valid IF-ELSE IF-ELSE chain\n"); }
-    ;
-
-elseif_blocks:
-    elseif_blocks ELSE IF LPAREN cond RPAREN block
-    | ELSE IF LPAREN cond RPAREN block
-    ;
+        IF LPAREN /* condition */ RPAREN LBRACE /* statements */ RBRACE
+        | IF LPAREN /* condition */ RPAREN LBRACE /* statements */ RBRACE ELSE LBRACE /* statements */ RBRACE
+        ;
+for_stmt:
+        FOR LPAREN /* initialization */ SEMICOLON /* condition */ SEMICOLON /* increment */ RPAREN LBRACE /* statements */ RBRACE
+        ;
 
 while_stmt:
-    WHILE LPAREN cond RPAREN block { printf("Valid WHILE loop\n"); }
-    ;
-
-for_stmt:
-    FOR LPAREN stmt cond SEMICOLON stmt RPAREN block { printf("Valid FOR loop\n"); }
-    ;
+        WHILE LPAREN /* condition */ RPAREN LBRACE /* statements */ RBRACE
+        ;
 
 switch_stmt:
-    SWITCH LPAREN ID RPAREN LBRACE case_blocks RBRACE { printf("Valid SWITCH-CASE structure\n"); }
-    ;
+        SWITCH LPAREN ID RPAREN LBRACE case_list default_case RBRACE
+        | SWITCH LPAREN ID RPAREN LBRACE case_list RBRACE
+        ;
 
-case_blocks:
-    case_blocks CASE NUMBER COLON stmt_list
-    | case_blocks DEFAULT COLON stmt_list
-    | CASE NUMBER COLON stmt_list
-    | DEFAULT COLON stmt_list
-    ;
+case_list:
+        case_list case_stmt
+        |
+        ;
+case_stmt:
+        CASE NUMBER COLON /* statements */
+        ;
 
-cond:
-    ID RELOP ID
-    | ID RELOP NUMBER
-    ;
-
-block:
-    LBRACE stmt_list RBRACE
-    ;
+default_case:
+        DEFAULT COLON /* statements */
+        ;
 %%
-
-int main() {
-    printf("Enter C control structure code:\n");
-    yyparse();
-    return 0;
+void yyerror(const char *msg){
+  printf("Invalid equation or expression: %s\n",msg);
 }
 
-int yyerror(const char *s) {
-    printf("Syntax Error: %s\n", s);
-    return 0;
+int main(){
+  printf("Enter a Control Structure: \n");
+  yyparse();
+  printf("\nEntered code is valid\n");
+  return 0;
 }
